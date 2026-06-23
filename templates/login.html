@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Day In My Life</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0f0f1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: #1e1e30; border-radius: 16px; padding: 36px; width: 100%; max-width: 400px; }
+        h1 { text-align: center; font-size: 26px; background: linear-gradient(135deg, #a78bfa, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+        p.sub { text-align: center; color: #7c7c99; font-size: 13px; margin-bottom: 24px; }
+        label { font-size: 12px; color: #7c7c99; display: block; margin-bottom: 4px; }
+        input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #2e2e45; background: #0f0f1a; color: #e8e8f0; font-size: 14px; margin-bottom: 16px; outline: none; }
+        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: linear-gradient(135deg, #a78bfa, #60a5fa); color: white; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .link { text-align: center; margin-top: 16px; font-size: 13px; color: #7c7c99; }
+        .link a { color: #a78bfa; text-decoration: none; }
+        .error { background: #3a1a1a; border: 1px solid #ef4444; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #ef4444; margin-bottom: 16px; }
+        .success { background: #1a3a1a; border: 1px solid #4ade80; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #4ade80; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>🎯 Day In My Life</h1>
+    <p class="sub">DML Mode 🔥 — Login to continue</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="your@email.com" required>
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required>
+        <button type="submit" class="btn">Login 🚀</button>
+    </form>
+    <div class="link">
+        New here? <a href="/register">Create account</a>
+    </div>
+</div>
+</body>
+</html>

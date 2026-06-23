@@ -3,67 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> A Day In My Life 🎯</title>
+    <title>Day In My Life 🎯</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0f0f1a; color: #e8e8f0; font-family: 'Segoe UI', sans-serif; padding: 24px 16px; }
+        body { 
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e8e8f0; 
+            font-family: 'Segoe UI', sans-serif; 
+            padding: 24px 16px; 
+        }
         .container { max-width: 720px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 28px; background: linear-gradient(135deg, #a78bfa, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
-        .subtitle { text-align: center; color: #7c7c99; font-size: 14px; margin-bottom: 24px; }
-        .card { background: #1e1e30; border-radius: 14px; padding: 18px; margin-bottom: 20px; }
-        input, select { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #2e2e45; background: #0f0f1a; color: #e8e8f0; font-size: 14px; margin-bottom: 10px; }
+        .header { text-align: center; margin-bottom: 28px; }
+        h1 { font-size: 32px; background: linear-gradient(135deg, #f093fb, #f5576c, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; letter-spacing: -1px; }
+        .subtitle { color: #a0a0c0; font-size: 13px; margin-top: 4px; }
+        .username { color: #f093fb; font-size: 15px; font-weight: 700; margin-top: 6px; }
+        .logout { float: right; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .section-title { font-weight: 700; font-size: 13px; margin-bottom: 14px; letter-spacing: 0.5px; color: #f093fb; }
+        input[type="text"], input[type="time"] { 
+            width: 100%; padding: 11px 14px; border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(0,0,0,0.3); 
+            color: #e8e8f0; font-size: 14px; margin-bottom: 10px; outline: none; 
+            transition: border 0.2s;
+        }
+        input[type="text"]:focus, input[type="time"]:focus { border-color: #f093fb; }
         .time-row { display: flex; gap: 8px; }
-        .time-row div { flex: 1; }
-        label { font-size: 12px; color: #7c7c99; display: block; margin-bottom: 4px; }
-        .routine-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .routine-row input { width: auto; margin: 0; }
-        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: linear-gradient(135deg, #a78bfa, #60a5fa); color: white; font-weight: 700; font-size: 14px; cursor: pointer; }
-        .task-item { background: #1e1e30; border-radius: 12px; padding: 14px 16px; border: 1px solid #2e2e45; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-        .task-item.done { background: #1a2a1a; border-color: #2d4a2d; }
-        .tick-btn { width: 24px; height: 24px; border-radius: 6px; border: 2px solid #a78bfa; background: transparent; color: white; font-weight: 900; cursor: pointer; flex-shrink: 0; }
+        .time-row > div { flex: 1; }
+        label { font-size: 11px; color: #7c7c99; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .routine-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .routine-row input { width: auto; margin: 0; accent-color: #f093fb; }
+        .routine-label { font-size: 13px; color: #a0a0c0; cursor: pointer; }
+        .add-btn { width: 100%; padding: 13px; border-radius: 10px; border: none; background: linear-gradient(135deg, #f093fb, #f5576c); color: white; font-weight: 700; font-size: 14px; cursor: pointer; letter-spacing: 0.3px; transition: opacity 0.2s; }
+        .add-btn:hover { opacity: 0.9; }
+
+        /* Toggle add task */
+        .toggle-add-btn { width: 100%; padding: 11px; border-radius: 10px; border: 1px dashed rgba(240,147,251,0.4); background: transparent; color: #f093fb; font-weight: 600; font-size: 14px; cursor: pointer; margin-bottom: 16px; transition: all 0.2s; }
+        .toggle-add-btn:hover { background: rgba(240,147,251,0.08); }
+        .add-form { display: none; }
+        .add-form.open { display: block; }
+
+        /* Progress */
+        .progress-wrap { margin-bottom: 20px; }
+        .progress-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .progress-label { font-size: 13px; color: #a0a0c0; }
+        .progress-count { font-size: 13px; font-weight: 700; color: #f093fb; }
+        .progress-bar { background: rgba(0,0,0,0.3); border-radius: 99px; height: 10px; }
+        .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #f093fb, #f5576c, #fda085); transition: width 0.5s ease; }
+        .perfect-msg { text-align: center; color: #4ade80; font-weight: 700; margin-top: 10px; font-size: 14px; }
+
+        /* Tasks */
+        .task-item { 
+            background: rgba(255,255,255,0.04); 
+            border-radius: 12px; padding: 14px 16px; 
+            border: 1px solid rgba(255,255,255,0.07); 
+            display: flex; align-items: center; gap: 12px; 
+            margin-bottom: 10px; transition: all 0.2s;
+        }
+        .task-item:hover { background: rgba(255,255,255,0.07); }
+        .task-item.done { background: rgba(74,222,128,0.05); border-color: rgba(74,222,128,0.2); }
+        .task-item.overdue { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.05); }
+        .tick-btn { 
+            width: 26px; height: 26px; border-radius: 8px; 
+            border: 2px solid rgba(240,147,251,0.5); 
+            background: transparent; color: white; font-weight: 900; 
+            cursor: pointer; flex-shrink: 0; font-size: 13px;
+            transition: all 0.2s;
+        }
         .tick-btn.done { background: #4ade80; border-color: #4ade80; }
         .task-name { font-weight: 600; font-size: 15px; flex: 1; }
         .task-name.done { text-decoration: line-through; color: #4a7a4a; }
-        .task-time { font-size: 12px; color: #60a5fa; }
-        .delete-btn { background: none; border: none; color: #4a4a6a; cursor: pointer; font-size: 16px; }
-        .progress-bar { background: #0f0f1a; border-radius: 99px; height: 8px; margin-top: 8px; }
-        .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #a78bfa, #60a5fa); transition: width 0.4s; }
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .summary-box { background: #0f0f1a; border-radius: 10px; padding: 14px; text-align: center; }
-        .summary-num { font-size: 22px; font-weight: 800; }
-        .summary-label { font-size: 12px; color: #7c7c99; margin-top: 4px; }
-        .ai-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; font-weight: 700; font-size: 14px; cursor: pointer; margin-bottom: 14px; }
-        .ai-message { background: #0f0f1a; border-radius: 10px; padding: 14px; border-left: 3px solid #f59e0b; font-size: 14px; line-height: 1.6; }
-        .section-title { font-weight: 700; color: #a78bfa; font-size: 14px; margin-bottom: 12px; }
+        .task-meta { font-size: 12px; color: #60a5fa; margin-top: 3px; }
+        .task-meta.overdue { color: #ef4444; }
+        .delete-btn { background: none; border: none; color: rgba(255,255,255,0.2); cursor: pointer; font-size: 15px; padding: 4px; transition: color 0.2s; }
+        .delete-btn:hover { color: #ef4444; }
+
+        /* Summary */
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .summary-box { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px; text-align: center; }
+        .summary-num { font-size: 24px; font-weight: 900; }
+        .summary-lbl { font-size: 11px; color: #7c7c99; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .summary-msg { text-align: center; font-weight: 700; font-size: 14px; margin-top: 4px; }
+
+        /* Motivation popup */
+        .motivation-banner { 
+            display: none; position: fixed; bottom: 24px; right: 24px; 
+            max-width: 300px; 
+            background: linear-gradient(135deg, #1a0533, #2d1b4e);
+            border: 1px solid rgba(240,147,251,0.4); 
+            border-radius: 16px; padding: 18px 20px; 
+            box-shadow: 0 8px 32px rgba(240,147,251,0.2); 
+            z-index: 999; animation: slideIn 0.4s ease;
+        }
+        @keyframes slideIn { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .banner-label { font-size: 11px; color: #f093fb; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .banner-msg { font-size: 14px; line-height: 1.6; color: #e8e8f0; }
+        .close-banner { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 18px; position: absolute; top: 10px; right: 14px; }
+        .close-banner:hover { color: white; }
+
+        .footer { text-align: center; color: rgba(255,255,255,0.15); font-size: 12px; margin-top: 32px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🎯A Day In My Life</h1>
-    <p class="subtitle">DML Mode 🔥 — {{ today }}</p>
+    <div style="overflow:hidden; margin-bottom:20px;">
+        <a href="/logout"><button class="logout">Logout</button></a>
+    </div>
 
-    <!-- Progress -->
+    <div class="header">
+        <h1>🎯 Day In My Life</h1>
+        <p class="subtitle">DML Mode 🔥 &nbsp;•&nbsp; {{ today }}</p>
+        <p class="username">Welcome back, {{ user.name }}! 👋</p>
+    </div>
+
     {% set done_count = tasks|selectattr('done', 'equalto', 1)|list|length %}
     {% set total = tasks|length %}
     {% set percent = ((done_count / total) * 100)|int if total > 0 else 0 %}
+
     {% if total > 0 %}
-    <div class="card">
-        <div style="display:flex; justify-content:space-between;">
-            <span style="font-size:13px; color:#7c7c99;">Today's Progress</span>
-            <span style="font-size:13px; font-weight:700; color:#a78bfa;">{{ done_count }}/{{ total }} • {{ percent }}%</span>
+    <div class="card progress-wrap">
+        <div class="progress-top">
+            <span class="progress-label">Today's Progress</span>
+            <span class="progress-count">{{ done_count }}/{{ total }} • {{ percent }}%</span>
         </div>
         <div class="progress-bar">
             <div class="progress-fill" style="width:{{ percent }}%"></div>
         </div>
         {% if percent == 100 %}
-        <p style="text-align:center; color:#4ade80; font-weight:700; margin-top:10px;">🎉 Amazing! All tasks done today!</p>
+        <p class="perfect-msg">🎉 Unstoppable {{ user.name }}! All tasks crushed today!</p>
         {% endif %}
     </div>
     {% endif %}
 
-    <!-- Add Task -->
-    <div class="card">
-        <p class="section-title">➕ Add New Task</p>
+    <!-- Toggle Add Task -->
+    <button class="toggle-add-btn" onclick="toggleForm()" id="toggleBtn">➕ Add New Task</button>
+    <div class="card add-form" id="addForm">
+        <p class="section-title">➕ NEW TASK</p>
         <form action="/add" method="POST">
             <input type="text" name="name" placeholder="What do you need to do?" required>
             <div class="time-row">
@@ -78,25 +154,22 @@
             </div>
             <div class="routine-row">
                 <input type="checkbox" name="is_routine" id="routine">
-                <label for="routine" style="margin:0; cursor:pointer;">🔁 Routine task (repeats every day)</label>
+                <label for="routine" class="routine-label" style="margin:0;">🔁 Routine task (repeats every day)</label>
             </div>
-            <button type="submit" class="btn">Add Task</button>
+            <button type="submit" class="add-btn">Add Task 🚀</button>
         </form>
     </div>
 
-    <!-- Task List -->
+    <!-- Tasks -->
     {% for task in tasks %}
-    <div class="task-item {% if task.done %}done{% endif %}">
+    <div class="task-item {% if task.done %}done{% endif %}" data-end="{{ task.end_time }}" data-done="{{ task.done }}">
         <a href="/toggle/{{ task.id }}">
             <button class="tick-btn {% if task.done %}done{% endif %}">{% if task.done %}✓{% endif %}</button>
         </a>
         <div style="flex:1;">
             <p class="task-name {% if task.done %}done{% endif %}">{{ task.name }}</p>
             {% if task.start_time %}
-            <p class="task-time">⏰ {{ task.start_time }}{% if task.end_time %} – {{ task.end_time }}{% endif %}
-            {% if task.is_routine %} • 🔁 Routine{% endif %}
-            {% if task.done %} • ✅ Done!{% endif %}
-            </p>
+            <p class="task-meta">⏰ {{ task.start_time }}{% if task.end_time %} – {{ task.end_time }}{% endif %}{% if task.is_routine %} • 🔁{% endif %}{% if task.done %} • ✅ Done!{% endif %}</p>
             {% endif %}
         </div>
         <a href="/delete/{{ task.id }}"><button class="delete-btn">🗑</button></a>
@@ -104,74 +177,144 @@
     {% endfor %}
 
     {% if tasks|length == 0 %}
-    <div style="text-align:center; padding:40px; color:#7c7c99;">
-        <div style="font-size:40px;">📝</div>
-        <p style="font-weight:700; margin-top:12px;">No tasks yet! Add your first task above 🚀</p>
+    <div style="text-align:center; padding:48px 20px; color:rgba(255,255,255,0.3);">
+        <div style="font-size:48px; margin-bottom:12px;">📝</div>
+        <p style="font-weight:700; font-size:16px;">No tasks yet!</p>
+        <p style="font-size:13px; margin-top:6px;">Add your first task and start your day 🚀</p>
     </div>
     {% endif %}
 
-    <!-- AI Motivation -->
-    <div class="card" style="margin-top:20px;">
-        <p class="section-title">🤖 AI Coach — DML Mode</p>
-        <button class="ai-btn" onclick="getMotivation()">🔥 Motivate Me!</button>
-        <div class="ai-message" id="ai-msg" style="display:none;"></div>
-    </div>
-
-    <!-- Summary -->
     {% if total > 0 %}
-    <div class="card">
-        <p class="section-title">📊 Today's Report</p>
+    <div class="card" style="margin-top:8px;">
+        <p class="section-title">📊 TODAY'S REPORT</p>
         <div class="summary-grid">
             <div class="summary-box">
                 <p class="summary-num" style="color:#4ade80;">{{ done_count }}</p>
-                <p class="summary-label">✅ Done</p>
+                <p class="summary-lbl">✅ Done</p>
             </div>
             <div class="summary-box">
-                <p class="summary-num" style="color:#f59e0b;">{{ total - done_count }}</p>
-                <p class="summary-label">⏳ Pending</p>
+                <p class="summary-num" style="color:#fda085;">{{ total - done_count }}</p>
+                <p class="summary-lbl">⏳ Pending</p>
             </div>
             <div class="summary-box">
                 <p class="summary-num" style="color:#60a5fa;">{{ total }}</p>
-                <p class="summary-label">📋 Total</p>
+                <p class="summary-lbl">📋 Total</p>
             </div>
         </div>
-        <p style="text-align:center; font-weight:700; margin-top:14px; color:{% if percent == 100 %}#4ade80{% elif percent >= 50 %}#f59e0b{% else %}#ef4444{% endif %};">
-            {% if percent == 100 %}🎉 Perfect day! You're unstoppable!
-            {% elif percent >= 50 %}💪 Good start! Push harder!
-            {% else %}😤 DML! You can do better Suji!{% endif %}
+        <p class="summary-msg" style="color:{% if percent == 100 %}#4ade80{% elif percent >= 50 %}#fda085{% else %}#f5576c{% endif %};">
+            {% if percent == 100 %}🎉 Perfect day! You're on fire!
+            {% elif percent >= 50 %}💪 Good progress! Don't stop now!
+            {% else %}😤 DML {{ user.name }}! Push harder tomorrow!{% endif %}
         </p>
     </div>
     {% endif %}
 
-    <p style="text-align:center; color:#3a3a55; font-size:12px; margin-top:24px;">Made with 💜 for Suji • DML — Don't be Lazy!</p>
+    <p class="footer">Made with 💜 for {{ user.name }} • DML — Don't be Lazy!</p>
+</div>
+
+<!-- Motivation Popup -->
+<div class="motivation-banner" id="motivationBanner">
+    <button class="close-banner" onclick="closeBanner()">×</button>
+    <p class="banner-label">🤖 AI Coach</p>
+    <p class="banner-msg" id="bannerMsg"></p>
 </div>
 
 <script>
-async function getMotivation() {
-    const btn = document.querySelector('.ai-btn');
-    const msg = document.getElementById('ai-msg');
-    btn.textContent = 'Coach is typing... 🤔';
-    btn.disabled = true;
-    msg.style.display = 'none';
-    try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'claude-sonnet-4-6',
-                max_tokens: 1000,
-                messages: [{ role: 'user', content: 'Give a short 3-4 line powerful motivational message for a lazy girl named Suji who wants to become a Python Full Stack Developer. Warn about social media. End with one powerful quote. Use emojis.' }]
-            })
-        });
-        const data = await res.json();
-        msg.textContent = data.content[0].text;
-    } catch {
-        msg.textContent = "DML Suji! Stop scrolling, start coding! 🔥";
-    }
-    msg.style.display = 'block';
-    btn.textContent = '🔥 Motivate Me!';
-    btn.disabled = false;
+// Toggle add form
+function toggleForm() {
+    const form = document.getElementById('addForm');
+    const btn = document.getElementById('toggleBtn');
+    form.classList.toggle('open');
+    btn.textContent = form.classList.contains('open') ? '✕ Close' : '➕ Add New Task';
 }
+
+// Messages
+const userName = "{{ user.name }}";
+const messages = {
+    overdue: [
+        `⚠️ Hey ${userName}! Task time is up! Stop wasting time! 🔥`,
+        `😤 ${userName}, you said you'd do this by now. GET UP! 💪`,
+        `🚨 Time's up! No excuses — finish your pending task NOW!`,
+        `📵 Put the phone down ${userName}! Your task is waiting! ⏰`,
+    ],
+    idle: [
+        `👀 ${userName}, are you scrolling social media? GET BACK TO WORK! 🎯`,
+        `📵 Stop scrolling! Your dream dev job won't come by itself!`,
+        `💤 DML ${userName}! Every minute you waste is a minute behind!`,
+        `🔥 Focus ${userName}! Less Instagram, more GitHub!`,
+    ],
+    encourage: [
+        `💪 Great work ${userName}! Keep going, you're crushing it!`,
+        `🌟 You're doing amazing! Don't stop now ${userName}!`,
+        `🚀 One task at a time! You got this!`,
+        `🎯 ${userName} on fire! Keep the momentum going!`,
+    ]
+};
+
+function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function showBanner(msg) {
+    document.getElementById('bannerMsg').textContent = msg;
+    const banner = document.getElementById('motivationBanner');
+    banner.style.display = 'none';
+    setTimeout(() => banner.style.display = 'block', 100);
+    // Also browser notification
+    sendNotification(msg);
+}
+
+function closeBanner() {
+    document.getElementById('motivationBanner').style.display = 'none';
+}
+
+// Browser notifications
+function sendNotification(msg) {
+    if (Notification.permission === 'granted') {
+        new Notification('🎯 DML Coach', { body: msg, icon: '' });
+    }
+}
+
+// Request permission on load
+if (Notification.permission === 'default') {
+    Notification.requestPermission();
+}
+
+// Check overdue tasks
+function checkOverdue() {
+    const now = new Date();
+    const cur = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    document.querySelectorAll('.task-item').forEach(task => {
+        const end = task.dataset.end;
+        const done = task.dataset.done;
+        if (end && done === '0' && cur > end) {
+            task.classList.add('overdue');
+            const meta = task.querySelector('.task-meta');
+            if (meta) meta.classList.add('overdue');
+            showBanner(getRandom(messages.overdue));
+        }
+    });
+}
+
+// Encourage if some done
+const doneCount = {{ done_count }};
+const total = {{ total }};
+if (doneCount > 0 && doneCount < total) {
+    setTimeout(() => showBanner(getRandom(messages.encourage)), 2000);
+}
+
+checkOverdue();
+setInterval(checkOverdue, 60000);
+setInterval(() => showBanner(getRandom(messages.idle)), 600000);
+
+// Idle 5 mins
+let idleTimer;
+function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => showBanner(getRandom(messages.idle)), 300000);
+}
+document.addEventListener('mousemove', resetIdle);
+document.addEventListener('keypress', resetIdle);
+resetIdle();
 </script>
 </body>
+</html>
 </html>
