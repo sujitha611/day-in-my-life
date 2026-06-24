@@ -159,18 +159,31 @@ def delete(task_id):
     conn.commit()
     conn.close()
     return redirect('/')
-
 @app.route('/history')
 @login_required
 def history():
     conn = get_db()
     today = str(date.today())
-    days = conn.execute(
-        'SELECT task_date, COUNT(*) as total, SUM(done) as done FROM tasks WHERE user_id=? AND task_date != ? GROUP BY task_date ORDER BY task_date DESC',
-        (current_user.id, today)
-    ).fetchall()
+    search = request.args.get('search', '')
+    if search:
+        days = conn.execute(
+            '''SELECT task_date, COUNT(*) as total, SUM(done) as done 
+               FROM tasks WHERE user_id=? AND task_date != ? AND name LIKE ?
+               GROUP BY task_date ORDER BY task_date DESC''',
+            (current_user.id, today, f'%{search}%')
+        ).fetchall()
+        tasks = conn.execute(
+            'SELECT * FROM tasks WHERE user_id=? AND name LIKE ? ORDER BY task_date DESC',
+            (current_user.id, f'%{search}%')
+        ).fetchall()
+    else:
+        days = conn.execute(
+            'SELECT task_date, COUNT(*) as total, SUM(done) as done FROM tasks WHERE user_id=? AND task_date != ? GROUP BY task_date ORDER BY task_date DESC',
+            (current_user.id, today)
+        ).fetchall()
+        tasks = []
     conn.close()
-    return render_template('history.html', days=days, user=current_user)
+    return render_template('history.html', days=days, user=current_user, search=search, tasks=tasks)
 
 @app.route('/weekly')
 @login_required
