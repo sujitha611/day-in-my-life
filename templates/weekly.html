@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Report — Day In My Life</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #e8e8f0; font-family: 'Segoe UI', sans-serif; padding: 24px 16px; }
+        .container { max-width: 720px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 28px; }
+        h1 { font-size: 28px; background: linear-gradient(135deg, #f093fb, #f5576c, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .subtitle { color: #a0a0c0; font-size: 13px; margin-top: 4px; }
+        .logout { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-left: 6px; }
+        .back-btn { display: inline-block; margin-bottom: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; padding: 8px 16px; border-radius: 8px; font-size: 13px; text-decoration: none; }
+        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .section-title { font-weight: 700; font-size: 13px; margin-bottom: 16px; color: #f093fb; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Weekly summary */
+        .week-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .summary-box { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px; text-align: center; }
+        .summary-num { font-size: 28px; font-weight: 900; }
+        .summary-lbl { font-size: 11px; color: #7c7c99; margin-top: 4px; text-transform: uppercase; }
+
+        /* Bar chart */
+        .chart { display: flex; align-items: flex-end; gap: 8px; height: 160px; padding: 0 4px; margin-bottom: 8px; }
+        .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+        .bar-container { width: 100%; flex: 1; display: flex; align-items: flex-end; }
+        .bar { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.5s ease; min-height: 4px; }
+        .bar-label { font-size: 11px; color: #7c7c99; }
+        .bar-percent { font-size: 11px; font-weight: 700; color: #f093fb; }
+
+        /* Day cards */
+        .day-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+        .day-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .day-name { font-weight: 700; font-size: 14px; }
+        .day-date { font-size: 12px; color: #7c7c99; }
+        .day-count { font-size: 13px; font-weight: 700; color: #f093fb; }
+        .progress-bar { background: rgba(0,0,0,0.3); border-radius: 99px; height: 6px; }
+        .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #f093fb, #f5576c); }
+        .footer { text-align: center; color: rgba(255,255,255,0.15); font-size: 12px; margin-top: 32px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div style="text-align:right; margin-bottom:20px;">
+        <a href="/"><button class="logout">🏠 Home</button></a>
+        <a href="/history"><button class="logout">📅 History</button></a>
+        <a href="/logout"><button class="logout">Logout</button></a>
+    </div>
+
+    <div class="header">
+        <h1>📊 Weekly Report</h1>
+        <p class="subtitle">{{ user.name }}'s last 7 days performance 🗓️</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="week-summary">
+        <div class="summary-box">
+            <p class="summary-num" style="color:#4ade80;">{{ total_done }}</p>
+            <p class="summary-lbl">✅ Done</p>
+        </div>
+        <div class="summary-box">
+            <p class="summary-num" style="color:#fda085;">{{ total_tasks - total_done }}</p>
+            <p class="summary-lbl">⏳ Missed</p>
+        </div>
+        <div class="summary-box">
+            <p class="summary-num" style="color:#f093fb;">{{ week_percent }}%</p>
+            <p class="summary-lbl">🎯 Rate</p>
+        </div>
+    </div>
+
+    <!-- Weekly message -->
+    <div class="card" style="text-align:center; padding: 16px;">
+        <p style="font-size:15px; font-weight:700; color:
+            {% if week_percent == 100 %}#4ade80
+            {% elif week_percent >= 70 %}#fda085
+            {% elif week_percent >= 40 %}#f093fb
+            {% else %}#f5576c{% endif %};">
+            {% if week_percent == 100 %}🏆 Perfect week! You're absolutely unstoppable!
+            {% elif week_percent >= 70 %}🔥 Great week {{ user.name }}! Keep pushing!
+            {% elif week_percent >= 40 %}💪 Good effort! Next week do better!
+            {% else %}😤 DML {{ user.name }}! You need to work harder next week!{% endif %}
+        </p>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="card">
+        <p class="section-title">📈 This Week's Progress</p>
+        <div class="chart">
+            {% for day in week_data %}
+            <div class="bar-wrap">
+                <p class="bar-percent">{{ day.percent }}%</p>
+                <div class="bar-container">
+                    <div class="bar" style="height:{{ day.percent }}%;
+                        background: {% if day.percent == 100 %}linear-gradient(180deg, #4ade80, #22d3ee)
+                        {% elif day.percent >= 50 %}linear-gradient(180deg, #f093fb, #f5576c)
+                        {% elif day.percent > 0 %}linear-gradient(180deg, #fda085, #f5576c)
+                        {% else %}rgba(255,255,255,0.1){% endif %};"></div>
+                </div>
+                <p class="bar-label">{{ day.day }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Day by day -->
+    <div class="card">
+        <p class="section-title">📅 Day by Day</p>
+        {% for day in week_data %}
+        <div class="day-card">
+            <div class="day-top">
+                <div>
+                    <p class="day-name">{{ day.day }}</p>
+                    <p class="day-date">{{ day.date }}</p>
+                </div>
+                <span class="day-count">
+                    {% if day.total == 0 %}😴 Off / No tasks
+                    {% else %}{{ day.done }}/{{ day.total }} • {{ day.percent }}%{% endif %}
+                </span>
+            </div>
+            {% if day.total > 0 %}
+            <div class="progress-bar">
+                <div class="progress-fill" style="width:{{ day.percent }}%"></div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <p class="footer">Made with 💜 for {{ user.name }} • DML — Don't be Lazy!</p>
+</div>
+</body>
+</html>

@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
-from datetime import date
+from datetime import date, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'diml_secret_key_2026'
@@ -32,7 +32,8 @@ def init_db():
         end_time TEXT,
         is_routine INTEGER DEFAULT 0,
         done INTEGER DEFAULT 0,
-        task_date TEXT NOT NULL
+        task_date TEXT NOT NULL,
+        notes TEXT DEFAULT ''
     )''')
     conn.execute('''CREATE TABLE IF NOT EXISTS settings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,7 +64,7 @@ def get_days_off(user_id):
     conn.close()
     if setting and setting['days_off']:
         return [int(d) for d in setting['days_off'].split(',') if d]
-    return [5, 6]  # Default Sat, Sun
+    return [5, 6]
 
 @app.route('/')
 @login_required
@@ -98,25 +99,6 @@ def index():
     conn.close()
     return render_template('index.html', tasks=tasks, today=today, user=current_user, is_off=is_off)
 
-@app.route('/settings', methods=['GET', 'POST'])
-@login_required
-def settings():
-    if request.method == 'POST':
-        selected = request.form.getlist('days_off')
-        days_off_str = ','.join(selected)
-        conn = get_db()
-        existing = conn.execute('SELECT id FROM settings WHERE user_id=?', (current_user.id,)).fetchone()
-        if existing:
-            conn.execute('UPDATE settings SET days_off=? WHERE user_id=?', (days_off_str, current_user.id))
-        else:
-            conn.execute('INSERT INTO settings (user_id, days_off) VALUES (?,?)', (current_user.id, days_off_str))
-        conn.commit()
-        conn.close()
-        flash('Settings saved!', 'success')
-        return redirect(url_for('index'))
-    days_off = get_days_off(current_user.id)
-    return render_template('settings.html', user=current_user, days_off=days_off)
-
 @app.route('/add', methods=['POST'])
 @login_required
 def add_task():
@@ -124,10 +106,11 @@ def add_task():
     start_time = request.form['start_time']
     end_time = request.form['end_time']
     is_routine = 1 if request.form.get('is_routine') else 0
+    notes = request.form.get('notes', '')
     today = str(date.today())
     conn = get_db()
-    conn.execute('INSERT INTO tasks (user_id, name, start_time, end_time, is_routine, task_date) VALUES (?,?,?,?,?,?)',
-                (current_user.id, name, start_time, end_time, is_routine, today))
+    conn.execute('INSERT INTO tasks (user_id, name, start_time, end_time, is_routine, task_date, notes) VALUES (?,?,?,?,?,?,?)',
+                (current_user.id, name, start_time, end_time, is_routine, today, notes))
     conn.commit()
     conn.close()
     return redirect('/')
@@ -164,6 +147,58 @@ def history():
     ).fetchall()
     conn.close()
     return render_template('history.html', days=days, user=current_user)
+
+@app.route('/weekly')
+@login_required
+def weekly():
+    conn = get_db()
+    today = date.today()
+    # Last 7 days
+    week_data = []
+    total_done = 0
+    total_tasks = 0
+    for i in range(6, -1, -1):
+        day = today - timedelta(days=i)
+        day_str = str(day)
+        row = conn.execute(
+            'SELECT COUNT(*) as total, SUM(done) as done FROM tasks WHERE user_id=? AND task_date=?',
+            (current_user.id, day_str)
+        ).fetchone()
+        done = row['done'] or 0
+        total = row['total'] or 0
+        percent = int((done / total) * 100) if total > 0 else 0
+        week_data.append({
+            'date': day_str,
+            'day': day.strftime('%a'),
+            'done': done,
+            'total': total,
+            'percent': percent
+        })
+        total_done += done
+        total_tasks += total
+    conn.close()
+    week_percent = int((total_done / total_tasks) * 100) if total_tasks > 0 else 0
+    return render_template('weekly.html', week_data=week_data, user=current_user,
+                          total_done=total_done, total_tasks=total_tasks, week_percent=week_percent)
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    if request.method == 'POST':
+        selected = request.form.getlist('days_off')
+        days_off_str = ','.join(selected)
+        conn = get_db()
+        existing = conn.execute('SELECT id FROM settings WHERE user_id=?', (current_user.id,)).fetchone()
+        if existing:
+            conn.execute('UPDATE settings SET days_off=? WHERE user_id=?', (days_off_str, current_user.id))
+        else:
+            conn.execute('INSERT INTO settings (user_id, days_off) VALUES (?,?)', (current_user.id, days_off_str))
+        conn.commit()
+        conn.close()
+        flash('Settings saved!', 'success')
+        return redirect(url_for('index'))
+    days_off = get_days_off(current_user.id)
+    return render_template('settings.html', user=current_user, days_off=days_off)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
