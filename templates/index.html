@@ -6,102 +6,53 @@
     <title>Day In My Life 🎯</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: #e8e8f0; 
-            font-family: 'Segoe UI', sans-serif; 
-            padding: 24px 16px; 
-        }
+        body { min-height: 100vh; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #e8e8f0; font-family: 'Segoe UI', sans-serif; padding: 24px 16px; }
         .container { max-width: 720px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 28px; }
-        h1 { font-size: 32px; background: linear-gradient(135deg, #f093fb, #f5576c, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; letter-spacing: -1px; }
+        h1 { font-size: 32px; background: linear-gradient(135deg, #f093fb, #f5576c, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
         .subtitle { color: #a0a0c0; font-size: 13px; margin-top: 4px; }
         .username { color: #f093fb; font-size: 15px; font-weight: 700; margin-top: 6px; }
         .logout { float: right; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
         .section-title { font-weight: 700; font-size: 13px; margin-bottom: 14px; letter-spacing: 0.5px; color: #f093fb; }
-        input[type="text"], input[type="time"] { 
-            width: 100%; padding: 11px 14px; border-radius: 10px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            background: rgba(0,0,0,0.3); 
-            color: #e8e8f0; font-size: 14px; margin-bottom: 10px; outline: none; 
-            transition: border 0.2s;
-        }
+        input[type="text"], input[type="time"] { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: #e8e8f0; font-size: 14px; margin-bottom: 10px; outline: none; }
         input[type="text"]:focus, input[type="time"]:focus { border-color: #f093fb; }
         .time-row { display: flex; gap: 8px; }
         .time-row > div { flex: 1; }
         label { font-size: 11px; color: #7c7c99; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .routine-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
         .routine-row input { width: auto; margin: 0; accent-color: #f093fb; }
-        .routine-label { font-size: 13px; color: #a0a0c0; cursor: pointer; }
-        .add-btn { width: 100%; padding: 13px; border-radius: 10px; border: none; background: linear-gradient(135deg, #f093fb, #f5576c); color: white; font-weight: 700; font-size: 14px; cursor: pointer; letter-spacing: 0.3px; transition: opacity 0.2s; }
-        .add-btn:hover { opacity: 0.9; }
-
-        /* Toggle add task */
-        .toggle-add-btn { width: 100%; padding: 11px; border-radius: 10px; border: 1px dashed rgba(240,147,251,0.4); background: transparent; color: #f093fb; font-weight: 600; font-size: 14px; cursor: pointer; margin-bottom: 16px; transition: all 0.2s; }
-        .toggle-add-btn:hover { background: rgba(240,147,251,0.08); }
+        .add-btn { width: 100%; padding: 13px; border-radius: 10px; border: none; background: linear-gradient(135deg, #f093fb, #f5576c); color: white; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .toggle-add-btn { width: 100%; padding: 11px; border-radius: 10px; border: 1px dashed rgba(240,147,251,0.4); background: transparent; color: #f093fb; font-weight: 600; font-size: 14px; cursor: pointer; margin-bottom: 16px; }
         .add-form { display: none; }
         .add-form.open { display: block; }
-
-        /* Progress */
-        .progress-wrap { margin-bottom: 20px; }
-        .progress-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .progress-label { font-size: 13px; color: #a0a0c0; }
-        .progress-count { font-size: 13px; font-weight: 700; color: #f093fb; }
         .progress-bar { background: rgba(0,0,0,0.3); border-radius: 99px; height: 10px; }
         .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #f093fb, #f5576c, #fda085); transition: width 0.5s ease; }
-        .perfect-msg { text-align: center; color: #4ade80; font-weight: 700; margin-top: 10px; font-size: 14px; }
-
-        /* Tasks */
-        .task-item { 
-            background: rgba(255,255,255,0.04); 
-            border-radius: 12px; padding: 14px 16px; 
-            border: 1px solid rgba(255,255,255,0.07); 
-            display: flex; align-items: center; gap: 12px; 
-            margin-bottom: 10px; transition: all 0.2s;
-        }
-        .task-item:hover { background: rgba(255,255,255,0.07); }
+        .task-item { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 12px; margin-bottom: 10px; transition: all 0.2s; }
         .task-item.done { background: rgba(74,222,128,0.05); border-color: rgba(74,222,128,0.2); }
         .task-item.overdue { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.05); }
-        .tick-btn { 
-            width: 26px; height: 26px; border-radius: 8px; 
-            border: 2px solid rgba(240,147,251,0.5); 
-            background: transparent; color: white; font-weight: 900; 
-            cursor: pointer; flex-shrink: 0; font-size: 13px;
-            transition: all 0.2s;
-        }
+        .tick-btn { width: 26px; height: 26px; border-radius: 8px; border: 2px solid rgba(240,147,251,0.5); background: transparent; color: white; font-weight: 900; cursor: pointer; flex-shrink: 0; font-size: 13px; }
         .tick-btn.done { background: #4ade80; border-color: #4ade80; }
         .task-name { font-weight: 600; font-size: 15px; flex: 1; }
         .task-name.done { text-decoration: line-through; color: #4a7a4a; }
         .task-meta { font-size: 12px; color: #60a5fa; margin-top: 3px; }
         .task-meta.overdue { color: #ef4444; }
-        .delete-btn { background: none; border: none; color: rgba(255,255,255,0.2); cursor: pointer; font-size: 15px; padding: 4px; transition: color 0.2s; }
-        .delete-btn:hover { color: #ef4444; }
-
-        /* Summary */
+        .delete-btn { background: none; border: none; color: rgba(255,255,255,0.2); cursor: pointer; font-size: 15px; }
         .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
         .summary-box { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px; text-align: center; }
         .summary-num { font-size: 24px; font-weight: 900; }
-        .summary-lbl { font-size: 11px; color: #7c7c99; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .summary-msg { text-align: center; font-weight: 700; font-size: 14px; margin-top: 4px; }
-
+        .summary-lbl { font-size: 11px; color: #7c7c99; margin-top: 4px; text-transform: uppercase; }
+        /* Weekend */
+        .weekend-card { text-align: center; padding: 48px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; margin-bottom: 20px; }
+        .weekend-emoji { font-size: 56px; margin-bottom: 16px; }
+        .weekend-title { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #f093fb, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .weekend-msg { color: #a0a0c0; font-size: 14px; line-height: 1.6; }
         /* Motivation popup */
-        .motivation-banner { 
-            display: none; position: fixed; bottom: 24px; right: 24px; 
-            max-width: 300px; 
-            background: linear-gradient(135deg, #1a0533, #2d1b4e);
-            border: 1px solid rgba(240,147,251,0.4); 
-            border-radius: 16px; padding: 18px 20px; 
-            box-shadow: 0 8px 32px rgba(240,147,251,0.2); 
-            z-index: 999; animation: slideIn 0.4s ease;
-        }
+        .motivation-banner { display: none; position: fixed; bottom: 24px; right: 24px; max-width: 300px; background: linear-gradient(135deg, #1a0533, #2d1b4e); border: 1px solid rgba(240,147,251,0.4); border-radius: 16px; padding: 18px 20px; box-shadow: 0 8px 32px rgba(240,147,251,0.2); z-index: 999; animation: slideIn 0.4s ease; }
         @keyframes slideIn { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .banner-label { font-size: 11px; color: #f093fb; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
         .banner-msg { font-size: 14px; line-height: 1.6; color: #e8e8f0; }
         .close-banner { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 18px; position: absolute; top: 10px; right: 14px; }
-        .close-banner:hover { color: white; }
-
         .footer { text-align: center; color: rgba(255,255,255,0.15); font-size: 12px; margin-top: 32px; }
     </style>
 </head>
@@ -117,50 +68,55 @@
         <p class="username">Welcome back, {{ user.name }}! 👋</p>
     </div>
 
+    {% if is_weekend %}
+    <!-- Weekend Mode -->
+    <div class="weekend-card">
+        <div class="weekend-emoji">🎉</div>
+        <p class="weekend-title">It's Weekend! Rest Day 😴</p>
+        <p class="weekend-msg">
+            Hey {{ user.name }}! Today is your well-deserved day off! 🌟<br><br>
+            Relax, recharge, and come back stronger on Monday! 💪<br>
+            No tasks today — you earned this break! 🎊
+        </p>
+    </div>
+    {% else %}
+
     {% set done_count = tasks|selectattr('done', 'equalto', 1)|list|length %}
     {% set total = tasks|length %}
     {% set percent = ((done_count / total) * 100)|int if total > 0 else 0 %}
 
     {% if total > 0 %}
-    <div class="card progress-wrap">
-        <div class="progress-top">
-            <span class="progress-label">Today's Progress</span>
-            <span class="progress-count">{{ done_count }}/{{ total }} • {{ percent }}%</span>
+    <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span style="font-size:13px; color:#a0a0c0;">Today's Progress</span>
+            <span style="font-size:13px; font-weight:700; color:#f093fb;">{{ done_count }}/{{ total }} • {{ percent }}%</span>
         </div>
         <div class="progress-bar">
             <div class="progress-fill" style="width:{{ percent }}%"></div>
         </div>
         {% if percent == 100 %}
-        <p class="perfect-msg">🎉 Unstoppable {{ user.name }}! All tasks crushed today!</p>
+        <p style="text-align:center; color:#4ade80; font-weight:700; margin-top:10px;">🎉 Unstoppable {{ user.name }}! All tasks crushed!</p>
         {% endif %}
     </div>
     {% endif %}
 
-    <!-- Toggle Add Task -->
     <button class="toggle-add-btn" onclick="toggleForm()" id="toggleBtn">➕ Add New Task</button>
     <div class="card add-form" id="addForm">
         <p class="section-title">➕ NEW TASK</p>
         <form action="/add" method="POST">
             <input type="text" name="name" placeholder="What do you need to do?" required>
             <div class="time-row">
-                <div>
-                    <label>Start Time</label>
-                    <input type="time" name="start_time">
-                </div>
-                <div>
-                    <label>End Time</label>
-                    <input type="time" name="end_time">
-                </div>
+                <div><label>Start Time</label><input type="time" name="start_time"></div>
+                <div><label>End Time</label><input type="time" name="end_time"></div>
             </div>
             <div class="routine-row">
                 <input type="checkbox" name="is_routine" id="routine">
-                <label for="routine" class="routine-label" style="margin:0;">🔁 Routine task (repeats every day)</label>
+                <label for="routine" style="margin:0; text-transform:none; font-size:13px; color:#a0a0c0; cursor:pointer;">🔁 Routine task (repeats every day)</label>
             </div>
             <button type="submit" class="add-btn">Add Task 🚀</button>
         </form>
     </div>
 
-    <!-- Tasks -->
     {% for task in tasks %}
     <div class="task-item {% if task.done %}done{% endif %}" data-end="{{ task.end_time }}" data-done="{{ task.done }}">
         <a href="/toggle/{{ task.id }}">
@@ -201,12 +157,14 @@
                 <p class="summary-lbl">📋 Total</p>
             </div>
         </div>
-        <p class="summary-msg" style="color:{% if percent == 100 %}#4ade80{% elif percent >= 50 %}#fda085{% else %}#f5576c{% endif %};">
+        <p style="text-align:center; font-weight:700; margin-top:14px; color:{% if percent == 100 %}#4ade80{% elif percent >= 50 %}#fda085{% else %}#f5576c{% endif %};">
             {% if percent == 100 %}🎉 Perfect day! You're on fire!
             {% elif percent >= 50 %}💪 Good progress! Don't stop now!
-            {% else %}😤 DML {{ user.name }}! Push harder tomorrow!{% endif %}
+            {% else %}😤 DML {{ user.name }}! Push harder!{% endif %}
         </p>
     </div>
+    {% endif %}
+
     {% endif %}
 
     <p class="footer">Made with 💜 for {{ user.name }} • DML — Don't be Lazy!</p>
@@ -220,7 +178,6 @@
 </div>
 
 <script>
-// Toggle add form
 function toggleForm() {
     const form = document.getElementById('addForm');
     const btn = document.getElementById('toggleBtn');
@@ -228,26 +185,25 @@ function toggleForm() {
     btn.textContent = form.classList.contains('open') ? '✕ Close' : '➕ Add New Task';
 }
 
-// Messages
 const userName = "{{ user.name }}";
+const isWeekend = {{ 'true' if is_weekend else 'false' }};
+
 const messages = {
     overdue: [
         `⚠️ Hey ${userName}! Task time is up! Stop wasting time! 🔥`,
-        `😤 ${userName}, you said you'd do this by now. GET UP! 💪`,
+        `😤 ${userName}, GET UP! Your task is waiting! 💪`,
         `🚨 Time's up! No excuses — finish your pending task NOW!`,
-        `📵 Put the phone down ${userName}! Your task is waiting! ⏰`,
     ],
     idle: [
-        `👀 ${userName}, are you scrolling social media? GET BACK TO WORK! 🎯`,
-        `📵 Stop scrolling! Your dream dev job won't come by itself!`,
+        `👀 ${userName}, stop scrolling social media! GET BACK TO WORK! 🎯`,
+        `📵 Less Instagram, more GitHub ${userName}!`,
         `💤 DML ${userName}! Every minute you waste is a minute behind!`,
-        `🔥 Focus ${userName}! Less Instagram, more GitHub!`,
+        `🔥 Focus ${userName}! Your dream dev job won't come by itself!`,
     ],
     encourage: [
         `💪 Great work ${userName}! Keep going, you're crushing it!`,
         `🌟 You're doing amazing! Don't stop now ${userName}!`,
         `🚀 One task at a time! You got this!`,
-        `🎯 ${userName} on fire! Keep the momentum going!`,
     ]
 };
 
@@ -258,63 +214,52 @@ function showBanner(msg) {
     const banner = document.getElementById('motivationBanner');
     banner.style.display = 'none';
     setTimeout(() => banner.style.display = 'block', 100);
-    // Also browser notification
-    sendNotification(msg);
+    if (Notification.permission === 'granted') {
+        new Notification('🎯 DML Coach', { body: msg });
+    }
 }
 
 function closeBanner() {
     document.getElementById('motivationBanner').style.display = 'none';
 }
 
-// Browser notifications
-function sendNotification(msg) {
-    if (Notification.permission === 'granted') {
-        new Notification('🎯 DML Coach', { body: msg, icon: '' });
+if (!isWeekend) {
+    if (Notification.permission === 'default') Notification.requestPermission();
+
+    function checkOverdue() {
+        const now = new Date();
+        const cur = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+        document.querySelectorAll('.task-item').forEach(task => {
+            const end = task.dataset.end;
+            const done = task.dataset.done;
+            if (end && done === '0' && cur > end) {
+                task.classList.add('overdue');
+                const meta = task.querySelector('.task-meta');
+                if (meta) meta.classList.add('overdue');
+                showBanner(getRandom(messages.overdue));
+            }
+        });
     }
-}
 
-// Request permission on load
-if (Notification.permission === 'default') {
-    Notification.requestPermission();
-}
+    const doneCount = {{ done_count if not is_weekend else 0 }};
+    const total = {{ total if not is_weekend else 0 }};
+    if (doneCount > 0 && doneCount < total) {
+        setTimeout(() => showBanner(getRandom(messages.encourage)), 2000);
+    }
 
-// Check overdue tasks
-function checkOverdue() {
-    const now = new Date();
-    const cur = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-    document.querySelectorAll('.task-item').forEach(task => {
-        const end = task.dataset.end;
-        const done = task.dataset.done;
-        if (end && done === '0' && cur > end) {
-            task.classList.add('overdue');
-            const meta = task.querySelector('.task-meta');
-            if (meta) meta.classList.add('overdue');
-            showBanner(getRandom(messages.overdue));
-        }
-    });
-}
+    checkOverdue();
+    setInterval(checkOverdue, 60000);
+    setInterval(() => showBanner(getRandom(messages.idle)), 600000);
 
-// Encourage if some done
-const doneCount = {{ done_count }};
-const total = {{ total }};
-if (doneCount > 0 && doneCount < total) {
-    setTimeout(() => showBanner(getRandom(messages.encourage)), 2000);
+    let idleTimer;
+    function resetIdle() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => showBanner(getRandom(messages.idle)), 300000);
+    }
+    document.addEventListener('mousemove', resetIdle);
+    document.addEventListener('keypress', resetIdle);
+    resetIdle();
 }
-
-checkOverdue();
-setInterval(checkOverdue, 60000);
-setInterval(() => showBanner(getRandom(messages.idle)), 600000);
-
-// Idle 5 mins
-let idleTimer;
-function resetIdle() {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => showBanner(getRandom(messages.idle)), 300000);
-}
-document.addEventListener('mousemove', resetIdle);
-document.addEventListener('keypress', resetIdle);
-resetIdle();
 </script>
 </body>
-</html>
 </html>

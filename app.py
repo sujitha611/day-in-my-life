@@ -57,10 +57,50 @@ def load_user(user_id):
 def index():
     conn = get_db()
     today = str(date.today())
-    tasks = conn.execute('SELECT * FROM tasks WHERE user_id=? AND task_date=?', 
-                        (current_user.id, today)).fetchall()
+    today_date = date.today()
+    is_weekend = today_date.weekday() in [5, 6]  # 5=Saturday, 6=Sunday
+    tasks = []
+    if not is_weekend:
+        tasks = conn.execute('SELECT * FROM tasks WHERE user_id=? AND task_date=?',
+                            (current_user.id, today)).fetchall()
     conn.close()
-    return render_template('index.html', tasks=tasks, today=today, user=current_user)
+    return render_template('index.html', tasks=tasks, today=today, user=current_user, is_weekend=is_weekend)
+
+@app.route('/add', methods=['POST'])
+@login_required
+def add_task():
+    name = request.form['name']
+    start_time = request.form['start_time']
+    end_time = request.form['end_time']
+    is_routine = 1 if request.form.get('is_routine') else 0
+    today = str(date.today())
+    conn = get_db()
+    conn.execute('INSERT INTO tasks (user_id, name, start_time, end_time, is_routine, task_date) VALUES (?,?,?,?,?,?)',
+                (current_user.id, name, start_time, end_time, is_routine, today))
+    conn.commit()
+    conn.close()
+    return redirect('/')
+
+@app.route('/toggle/<int:task_id>')
+@login_required
+def toggle(task_id):
+    conn = get_db()
+    task = conn.execute('SELECT * FROM tasks WHERE id=? AND user_id=?',
+                       (task_id, current_user.id)).fetchone()
+    if task:
+        conn.execute('UPDATE tasks SET done=? WHERE id=?', (1 - task['done'], task_id))
+        conn.commit()
+    conn.close()
+    return redirect('/')
+
+@app.route('/delete/<int:task_id>')
+@login_required
+def delete(task_id):
+    conn = get_db()
+    conn.execute('DELETE FROM tasks WHERE id=? AND user_id=?', (task_id, current_user.id))
+    conn.commit()
+    conn.close()
+    return redirect('/')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -100,42 +140,6 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
-
-@app.route('/add', methods=['POST'])
-@login_required
-def add_task():
-    name = request.form['name']
-    start_time = request.form['start_time']
-    end_time = request.form['end_time']
-    is_routine = 1 if request.form.get('is_routine') else 0
-    today = str(date.today())
-    conn = get_db()
-    conn.execute('INSERT INTO tasks (user_id, name, start_time, end_time, is_routine, task_date) VALUES (?,?,?,?,?,?)',
-                (current_user.id, name, start_time, end_time, is_routine, today))
-    conn.commit()
-    conn.close()
-    return redirect('/')
-
-@app.route('/toggle/<int:task_id>')
-@login_required
-def toggle(task_id):
-    conn = get_db()
-    task = conn.execute('SELECT * FROM tasks WHERE id=? AND user_id=?', 
-                       (task_id, current_user.id)).fetchone()
-    if task:
-        conn.execute('UPDATE tasks SET done=? WHERE id=?', (1 - task['done'], task_id))
-        conn.commit()
-    conn.close()
-    return redirect('/')
-
-@app.route('/delete/<int:task_id>')
-@login_required
-def delete(task_id):
-    conn = get_db()
-    conn.execute('DELETE FROM tasks WHERE id=? AND user_id=?', (task_id, current_user.id))
-    conn.commit()
-    conn.close()
-    return redirect('/')
 
 if __name__ == '__main__':
     init_db()
