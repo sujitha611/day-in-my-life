@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
-from datetime import date
+from datetime import date, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'diml_secret_key_2026'
@@ -58,9 +58,29 @@ def index():
     conn = get_db()
     today = str(date.today())
     today_date = date.today()
-    is_weekend = today_date.weekday() in [5, 6]  # 5=Saturday, 6=Sunday
+    is_weekend = today_date.weekday() in [5, 6]
     tasks = []
     if not is_weekend:
+        # Check if today's tasks exist
+        existing = conn.execute('SELECT COUNT(*) FROM tasks WHERE user_id=? AND task_date=?',
+                               (current_user.id, today)).fetchone()[0]
+        # If no tasks today, carry forward routine tasks
+        if existing == 0:
+            routine_tasks = conn.execute(
+                'SELECT * FROM tasks WHERE user_id=? AND is_routine=1 AND task_date != ?',
+                (current_user.id, today)
+            ).fetchall()
+            for task in routine_tasks:
+                already = conn.execute(
+                    'SELECT COUNT(*) FROM tasks WHERE user_id=? AND name=? AND task_date=?',
+                    (current_user.id, task['name'], today)
+                ).fetchone()[0]
+                if already == 0:
+                    conn.execute(
+                        'INSERT INTO tasks (user_id, name, start_time, end_time, is_routine, done, task_date) VALUES (?,?,?,?,?,0,?)',
+                        (current_user.id, task['name'], task['start_time'], task['end_time'], 1, today)
+                    )
+            conn.commit()
         tasks = conn.execute('SELECT * FROM tasks WHERE user_id=? AND task_date=?',
                             (current_user.id, today)).fetchall()
     conn.close()
@@ -101,6 +121,18 @@ def delete(task_id):
     conn.commit()
     conn.close()
     return redirect('/')
+
+@app.route('/history')
+@login_required
+def history():
+    conn = get_db()
+    today = str(date.today())
+    days = conn.execute(
+        'SELECT task_date, COUNT(*) as total, SUM(done) as done FROM tasks WHERE user_id=? AND task_date != ? GROUP BY task_date ORDER BY task_date DESC',
+        (current_user.id, today)
+    ).fetchall()
+    conn.close()
+    return render_template('history.html', days=days, user=current_user)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

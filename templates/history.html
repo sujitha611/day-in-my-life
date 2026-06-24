@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History — Day In My Life</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #e8e8f0; font-family: 'Segoe UI', sans-serif; padding: 24px 16px; }
+        .container { max-width: 720px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 28px; }
+        h1 { font-size: 28px; background: linear-gradient(135deg, #f093fb, #f5576c, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .subtitle { color: #a0a0c0; font-size: 13px; margin-top: 4px; }
+        .back-btn { display: inline-block; margin-bottom: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; text-decoration: none; }
+        .day-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 12px; }
+        .day-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .day-date { font-weight: 700; font-size: 15px; color: #e8e8f0; }
+        .day-count { font-size: 13px; font-weight: 700; color: #f093fb; }
+        .progress-bar { background: rgba(0,0,0,0.3); border-radius: 99px; height: 8px; margin-bottom: 8px; }
+        .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #f093fb, #f5576c, #fda085); }
+        .day-msg { font-size: 12px; font-weight: 600; }
+        .empty { text-align: center; padding: 48px 20px; color: rgba(255,255,255,0.3); }
+        .empty div { font-size: 48px; margin-bottom: 12px; }
+        .logout { float: right; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div style="overflow:hidden; margin-bottom:20px;">
+        <a href="/logout"><button class="logout">Logout</button></a>
+    </div>
+
+    <div class="header">
+        <h1>📅 History</h1>
+        <p class="subtitle">{{ user.name }}'s past days 🗓️</p>
+    </div>
+
+    <a href="/" class="back-btn">← Back to Today</a>
+
+    {% if days %}
+        {% for day in days %}
+        {% set percent = ((day.done / day.total) * 100)|int if day.total > 0 else 0 %}
+        <div class="day-card">
+            <div class="day-top">
+                <p class="day-date">📅 {{ day.task_date }}</p>
+                <span class="day-count">{{ day.done }}/{{ day.total }} • {{ percent }}%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width:{{ percent }}%"></div>
+            </div>
+            <p class="day-msg" style="color:{% if percent == 100 %}#4ade80{% elif percent >= 50 %}#fda085{% else %}#f5576c{% endif %};">
+                {% if percent == 100 %}🎉 Perfect day!
+                {% elif percent >= 50 %}💪 Good effort!
+                {% else %}😤 DML! Do better!{% endif %}
+            </p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty">
+            <div>📅</div>
+            <p style="font-weight:700; font-size:16px;">No history yet!</p>
+            <p style="font-size:13px; margin-top:6px;">Complete some tasks today and check back tomorrow!</p>
+        </div>
+    {% endif %}
+
+    <p style="text-align:center; color:rgba(255,255,255,0.15); font-size:12px; margin-top:32px;">Made with 💜 for {{ user.name }} • DML — Don't be Lazy!</p>
+</div>
+</body>
+</html>
