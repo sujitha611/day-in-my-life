@@ -68,6 +68,11 @@
         <h1>🎯 Day In My Life</h1>
         <p class="subtitle">DML Mode 🔥 &nbsp;•&nbsp; {{ today }}</p>
         <p class="username">Welcome back, {{ user.name }}! 👋</p>
+        {% if streak > 0 %}
+        <p style="color:#fda085; font-size:14px; font-weight:700; margin-top:4px;">🔥 {{ streak }} day streak! Keep it up!</p>
+        {% else %}
+        <p style="color:#7c7c99; font-size:13px; margin-top:4px;">Complete today's tasks to start a streak! 💪</p>
+        {% endif %}
     </div>
 
     {% if is_off %}

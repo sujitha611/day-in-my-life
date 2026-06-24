@@ -66,6 +66,29 @@ def get_days_off(user_id):
         return [int(d) for d in setting['days_off'].split(',') if d]
     return [5, 6]
 
+def get_streak(user_id):
+    conn = get_db()
+    streak = 0
+    today = date.today()
+    days_off = get_days_off(user_id)
+    for i in range(1, 30):
+        day = today - timedelta(days=i)
+        if day.weekday() in days_off:
+            continue
+        day_str = str(day)
+        row = conn.execute(
+            'SELECT COUNT(*) as total, SUM(done) as done FROM tasks WHERE user_id=? AND task_date=?',
+            (user_id, day_str)
+        ).fetchone()
+        total = row['total'] or 0
+        done = row['done'] or 0
+        if total > 0 and done == total:
+            streak += 1
+        else:
+            break
+    conn.close()
+    return streak
+
 @app.route('/')
 @login_required
 def index():
@@ -74,6 +97,7 @@ def index():
     today_date = date.today()
     days_off = get_days_off(current_user.id)
     is_off = today_date.weekday() in days_off
+    streak = get_streak(current_user.id)
     tasks = []
     if not is_off:
         existing = conn.execute('SELECT COUNT(*) FROM tasks WHERE user_id=? AND task_date=?',
@@ -97,7 +121,7 @@ def index():
         tasks = conn.execute('SELECT * FROM tasks WHERE user_id=? AND task_date=?',
                             (current_user.id, today)).fetchall()
     conn.close()
-    return render_template('index.html', tasks=tasks, today=today, user=current_user, is_off=is_off)
+    return render_template('index.html', tasks=tasks, today=today, user=current_user, is_off=is_off, streak=streak)
 
 @app.route('/add', methods=['POST'])
 @login_required
@@ -153,7 +177,6 @@ def history():
 def weekly():
     conn = get_db()
     today = date.today()
-    # Last 7 days
     week_data = []
     total_done = 0
     total_tasks = 0
