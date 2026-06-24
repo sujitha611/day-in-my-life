@@ -12,7 +12,7 @@
         h1 { font-size: 32px; background: linear-gradient(135deg, #f093fb, #f5576c, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
         .subtitle { color: #a0a0c0; font-size: 13px; margin-top: 4px; }
         .username { color: #f093fb; font-size: 15px; font-weight: 700; margin-top: 6px; }
-        .logout { float: right; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+        .logout { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-left: 6px; }
         .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
         .section-title { font-weight: 700; font-size: 13px; margin-bottom: 14px; letter-spacing: 0.5px; color: #f093fb; }
         input[type="text"], input[type="time"] { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: #e8e8f0; font-size: 14px; margin-bottom: 10px; outline: none; }
@@ -42,26 +42,25 @@
         .summary-box { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px; text-align: center; }
         .summary-num { font-size: 24px; font-weight: 900; }
         .summary-lbl { font-size: 11px; color: #7c7c99; margin-top: 4px; text-transform: uppercase; }
-        /* Weekend */
-        .weekend-card { text-align: center; padding: 48px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; margin-bottom: 20px; }
-        .weekend-emoji { font-size: 56px; margin-bottom: 16px; }
-        .weekend-title { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #f093fb, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
-        .weekend-msg { color: #a0a0c0; font-size: 14px; line-height: 1.6; }
-        /* Motivation popup */
+        .off-card { text-align: center; padding: 48px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; margin-bottom: 20px; }
+        .off-emoji { font-size: 56px; margin-bottom: 16px; }
+        .off-title { font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #f093fb, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .off-msg { color: #a0a0c0; font-size: 14px; line-height: 1.6; }
         .motivation-banner { display: none; position: fixed; bottom: 24px; right: 24px; max-width: 300px; background: linear-gradient(135deg, #1a0533, #2d1b4e); border: 1px solid rgba(240,147,251,0.4); border-radius: 16px; padding: 18px 20px; box-shadow: 0 8px 32px rgba(240,147,251,0.2); z-index: 999; animation: slideIn 0.4s ease; }
         @keyframes slideIn { from { transform: translateY(80px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .banner-label { font-size: 11px; color: #f093fb; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
         .banner-msg { font-size: 14px; line-height: 1.6; color: #e8e8f0; }
         .close-banner { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 18px; position: absolute; top: 10px; right: 14px; }
         .footer { text-align: center; color: rgba(255,255,255,0.15); font-size: 12px; margin-top: 32px; }
+        .notif-btn { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(240,147,251,0.3); background: transparent; color: #f093fb; font-weight: 600; font-size: 13px; cursor: pointer; margin-bottom: 16px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div style="overflow:hidden; margin-bottom:20px;">
-      <a href="/history"><button class="logout" style="margin-right:8px;">📅 History</button></a>
-      <a href="/settings"><button class="logout" style="margin-right:8px;">⚙️ Settings</button></a>
-      <a href="/logout"><button class="logout">Logout</button></a>
+    <div style="text-align:right; margin-bottom:20px;">
+        <a href="/history"><button class="logout">📅 History</button></a>
+        <a href="/settings"><button class="logout">⚙️ Settings</button></a>
+        <a href="/logout"><button class="logout">Logout</button></a>
     </div>
 
     <div class="header">
@@ -70,16 +69,16 @@
         <p class="username">Welcome back, {{ user.name }}! 👋</p>
     </div>
 
-    {% if is_weekend %}
-    <!-- Weekend Mode -->
-    <div class="weekend-card">
-        <div class="weekend-emoji">🎉</div>
-        <p class="weekend-title">It's Weekend! Rest Day 😴</p>
-        <p class="weekend-msg">
+    {% if is_off %}
+    <div class="off-card">
+        <div class="off-emoji">🎉</div>
+        <p class="off-title">Rest Day! 😴</p>
+        <p class="off-msg">
             Hey {{ user.name }}! Today is your well-deserved day off! 🌟<br><br>
-            Relax, recharge, and come back stronger on Monday! 💪<br>
+            Relax, recharge, and come back stronger tomorrow! 💪<br>
             No tasks today — you earned this break! 🎊
         </p>
+        <a href="/settings" style="display:inline-block; margin-top:20px; color:#f093fb; font-size:13px;">⚙️ Change schedule</a>
     </div>
     {% else %}
 
@@ -102,6 +101,9 @@
     </div>
     {% endif %}
 
+    <!-- Enable Notifications Button -->
+    <button class="notif-btn" onclick="enableNotifications()">🔔 Enable Task Reminders</button>
+
     <button class="toggle-add-btn" onclick="toggleForm()" id="toggleBtn">➕ Add New Task</button>
     <div class="card add-form" id="addForm">
         <p class="section-title">➕ NEW TASK</p>
@@ -120,7 +122,11 @@
     </div>
 
     {% for task in tasks %}
-    <div class="task-item {% if task.done %}done{% endif %}" data-end="{{ task.end_time }}" data-done="{{ task.done }}">
+    <div class="task-item {% if task.done %}done{% endif %}" 
+         data-end="{{ task.end_time }}" 
+         data-start="{{ task.start_time }}"
+         data-name="{{ task.name }}"
+         data-done="{{ task.done }}">
         <a href="/toggle/{{ task.id }}">
             <button class="tick-btn {% if task.done %}done{% endif %}">{% if task.done %}✓{% endif %}</button>
         </a>
@@ -188,23 +194,29 @@ function toggleForm() {
 }
 
 const userName = "{{ user.name }}";
-const isWeekend = {{ 'true' if is_weekend else 'false' }};
+const isOff = {{ 'true' if is_off else 'false' }};
 
 const messages = {
     overdue: [
         `⚠️ Hey ${userName}! Task time is up! Stop wasting time! 🔥`,
         `😤 ${userName}, GET UP! Your task is waiting! 💪`,
         `🚨 Time's up! No excuses — finish your pending task NOW!`,
+        `📵 Put the phone down ${userName}! Your task is waiting! ⏰`,
+    ],
+    start: [
+        `⏰ Time to start! "${userName}" your task is starting now! 🚀`,
+        `🎯 Task starting! Focus mode ON ${userName}!`,
+        `💪 Get ready ${userName}! Your task begins now!`,
     ],
     idle: [
-        `👀 ${userName}, stop scrolling social media! GET BACK TO WORK! 🎯`,
+        `👀 ${userName}, stop scrolling! GET BACK TO WORK! 🎯`,
         `📵 Less Instagram, more GitHub ${userName}!`,
-        `💤 DML ${userName}! Every minute you waste is a minute behind!`,
-        `🔥 Focus ${userName}! Your dream dev job won't come by itself!`,
+        `💤 DML ${userName}! Every minute counts!`,
+        `🔥 Focus! Your dream dev job won't come by itself!`,
     ],
     encourage: [
-        `💪 Great work ${userName}! Keep going, you're crushing it!`,
-        `🌟 You're doing amazing! Don't stop now ${userName}!`,
+        `💪 Great work ${userName}! Keep going!`,
+        `🌟 You're doing amazing! Don't stop now!`,
         `🚀 One task at a time! You got this!`,
     ]
 };
@@ -216,41 +228,70 @@ function showBanner(msg) {
     const banner = document.getElementById('motivationBanner');
     banner.style.display = 'none';
     setTimeout(() => banner.style.display = 'block', 100);
+}
+
+function sendNotification(title, msg) {
     if (Notification.permission === 'granted') {
-        new Notification('🎯 DML Coach', { body: msg });
+        new Notification(title, { body: msg, icon: '' });
     }
+    showBanner(msg);
 }
 
 function closeBanner() {
     document.getElementById('motivationBanner').style.display = 'none';
 }
 
-if (!isWeekend) {
-    if (Notification.permission === 'default') Notification.requestPermission();
+function enableNotifications() {
+    Notification.requestPermission().then(perm => {
+        if (perm === 'granted') {
+            sendNotification('🎯 DML Coach', `Notifications enabled! I'll remind you about your tasks ${userName}! 💪`);
+            document.querySelector('.notif-btn').textContent = '🔔 Notifications Enabled ✅';
+            document.querySelector('.notif-btn').style.borderColor = 'rgba(74,222,128,0.5)';
+            document.querySelector('.notif-btn').style.color = '#4ade80';
+        }
+    });
+}
 
-    function checkOverdue() {
+if (!isOff) {
+    if (Notification.permission === 'granted') {
+        document.querySelector('.notif-btn').textContent = '🔔 Notifications Enabled ✅';
+        document.querySelector('.notif-btn').style.borderColor = 'rgba(74,222,128,0.5)';
+        document.querySelector('.notif-btn').style.color = '#4ade80';
+    }
+
+    function checkTasks() {
         const now = new Date();
         const cur = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
         document.querySelectorAll('.task-item').forEach(task => {
             const end = task.dataset.end;
+            const start = task.dataset.start;
+            const name = task.dataset.name;
             const done = task.dataset.done;
+
+            // Task starting now
+            if (start && done === '0' && cur === start) {
+                sendNotification('⏰ Task Starting!', `Time to start: "${name}" 🚀`);
+            }
+
+            // Task overdue
             if (end && done === '0' && cur > end) {
                 task.classList.add('overdue');
                 const meta = task.querySelector('.task-meta');
                 if (meta) meta.classList.add('overdue');
-                showBanner(getRandom(messages.overdue));
+                sendNotification('🚨 Task Overdue!', getRandom(messages.overdue));
             }
         });
     }
 
-    const doneCount = {{ done_count if not is_weekend else 0 }};
-    const total = {{ total if not is_weekend else 0 }};
+    const doneCount = {{ done_count if not is_off else 0 }};
+    const total = {{ total if not is_off else 0 }};
     if (doneCount > 0 && doneCount < total) {
         setTimeout(() => showBanner(getRandom(messages.encourage)), 2000);
     }
 
-    checkOverdue();
-    setInterval(checkOverdue, 60000);
+    checkTasks();
+    setInterval(checkTasks, 60000);
     setInterval(() => showBanner(getRandom(messages.idle)), 600000);
 
     let idleTimer;
