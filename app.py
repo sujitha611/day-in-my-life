@@ -301,7 +301,38 @@ def login():
             return redirect(url_for('index'))
         flash('Wrong email or password!', 'error')
     return render_template('login.html')
+@app.route('/export')
+@login_required
+def export():
+    import csv
+    import io
+    from flask import Response
+    conn = get_db()
+    tasks = conn.execute(
+        'SELECT name, start_time, end_time, is_routine, done, task_date, notes FROM tasks WHERE user_id=? ORDER BY task_date DESC',
+        (current_user.id,)
+    ).fetchall()
+    conn.close()
 
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Task', 'Start Time', 'End Time', 'Routine', 'Done', 'Date', 'Notes'])
+    for task in tasks:
+        writer.writerow([
+            task['name'],
+            task['start_time'],
+            task['end_time'],
+            'Yes' if task['is_routine'] else 'No',
+            'Done' if task['done'] else 'Pending',
+            task['task_date'],
+            task['notes']
+        ])
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment;filename=diml_tasks_{current_user.name}.csv'}
+    )
 @app.route('/logout')
 @login_required
 def logout():
