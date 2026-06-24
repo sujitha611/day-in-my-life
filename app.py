@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
-from datetime import date, timedelta
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = 'diml_secret_key_2026'
@@ -34,6 +34,11 @@ def init_db():
         done INTEGER DEFAULT 0,
         task_date TEXT NOT NULL
     )''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER UNIQUE NOT NULL,
+        days_off TEXT DEFAULT '5,6'
+    )''')
     conn.commit()
     conn.close()
 
@@ -52,19 +57,26 @@ def load_user(user_id):
         return User(user['id'], user['name'], user['email'])
     return None
 
+def get_days_off(user_id):
+    conn = get_db()
+    setting = conn.execute('SELECT days_off FROM settings WHERE user_id=?', (user_id,)).fetchone()
+    conn.close()
+    if setting and setting['days_off']:
+        return [int(d) for d in setting['days_off'].split(',') if d]
+    return [5, 6]  # Default Sat, Sun
+
 @app.route('/')
 @login_required
 def index():
     conn = get_db()
     today = str(date.today())
     today_date = date.today()
-    is_weekend = today_date.weekday() in [5, 6]
+    days_off = get_days_off(current_user.id)
+    is_off = today_date.weekday() in days_off
     tasks = []
-    if not is_weekend:
-        # Check if today's tasks exist
+    if not is_off:
         existing = conn.execute('SELECT COUNT(*) FROM tasks WHERE user_id=? AND task_date=?',
                                (current_user.id, today)).fetchone()[0]
-        # If no tasks today, carry forward routine tasks
         if existing == 0:
             routine_tasks = conn.execute(
                 'SELECT * FROM tasks WHERE user_id=? AND is_routine=1 AND task_date != ?',
@@ -84,7 +96,26 @@ def index():
         tasks = conn.execute('SELECT * FROM tasks WHERE user_id=? AND task_date=?',
                             (current_user.id, today)).fetchall()
     conn.close()
-    return render_template('index.html', tasks=tasks, today=today, user=current_user, is_weekend=is_weekend)
+    return render_template('index.html', tasks=tasks, today=today, user=current_user, is_off=is_off)
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    if request.method == 'POST':
+        selected = request.form.getlist('days_off')
+        days_off_str = ','.join(selected)
+        conn = get_db()
+        existing = conn.execute('SELECT id FROM settings WHERE user_id=?', (current_user.id,)).fetchone()
+        if existing:
+            conn.execute('UPDATE settings SET days_off=? WHERE user_id=?', (days_off_str, current_user.id))
+        else:
+            conn.execute('INSERT INTO settings (user_id, days_off) VALUES (?,?)', (current_user.id, days_off_str))
+        conn.commit()
+        conn.close()
+        flash('Settings saved!', 'success')
+        return redirect(url_for('index'))
+    days_off = get_days_off(current_user.id)
+    return render_template('settings.html', user=current_user, days_off=days_off)
 
 @app.route('/add', methods=['POST'])
 @login_required

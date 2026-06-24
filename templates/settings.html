@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — Day In My Life</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #e8e8f0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; padding: 24px 16px; }
+        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 36px; width: 100%; max-width: 460px; }
+        h1 { font-size: 24px; background: linear-gradient(135deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; margin-bottom: 6px; }
+        .subtitle { color: #7c7c99; font-size: 13px; margin-bottom: 28px; }
+        .section-title { font-size: 12px; color: #f093fb; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+        .days-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+        .day-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; }
+        .day-item:hover { background: rgba(240,147,251,0.08); }
+        .day-item input { accent-color: #f093fb; width: 16px; height: 16px; cursor: pointer; }
+        .day-item label { font-size: 14px; font-weight: 600; cursor: pointer; flex: 1; }
+        .day-item.off { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.05); }
+        .save-btn { width: 100%; padding: 13px; border-radius: 10px; border: none; background: linear-gradient(135deg, #f093fb, #f5576c); color: white; font-weight: 700; font-size: 14px; cursor: pointer; margin-bottom: 12px; }
+        .back-btn { display: block; text-align: center; color: #7c7c99; font-size: 13px; text-decoration: none; margin-top: 8px; }
+        .back-btn:hover { color: #f093fb; }
+        .success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #4ade80; margin-bottom: 16px; }
+        .note { font-size: 12px; color: #7c7c99; margin-bottom: 20px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px 14px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>⚙️ Settings</h1>
+    <p class="subtitle">Customize your schedule, {{ user.name }}!</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <p class="section-title">📅 Select Your Days Off</p>
+    <p class="note">✅ Checked = Day Off (no tasks) &nbsp;|&nbsp; Unchecked = Work day</p>
+
+    <form method="POST">
+        <div class="days-grid">
+            {% set day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+            {% set day_emojis = ['💼', '💼', '💼', '💼', '💼', '😴', '😴'] %}
+            {% for i in range(7) %}
+            <div class="day-item {% if i in days_off %}off{% endif %}">
+                <input type="checkbox" name="days_off" value="{{ i }}" id="day{{ i }}"
+                    {% if i in days_off %}checked{% endif %}
+                    onchange="this.closest('.day-item').classList.toggle('off', this.checked)">
+                <label for="day{{ i }}">{{ day_emojis[i] }} {{ day_names[i] }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="save-btn">💾 Save Settings</button>
+    </form>
+    <a href="/" class="back-btn">← Back to Today</a>
+</div>
+</body>
+</html>
