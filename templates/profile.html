@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — Day In My Life</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #e8e8f0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; padding: 24px 16px; }
+        .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 36px; width: 100%; max-width: 440px; }
+        h1 { font-size: 24px; background: linear-gradient(135deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; margin-bottom: 6px; text-align: center; }
+        .avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #f093fb, #f5576c); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; }
+        .username-display { text-align: center; font-size: 18px; font-weight: 700; color: #e8e8f0; margin-bottom: 4px; }
+        .email-display { text-align: center; font-size: 13px; color: #7c7c99; margin-bottom: 24px; }
+        .section-title { font-size: 11px; color: #f093fb; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 20px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { font-size: 11px; color: #7c7c99; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-wrap { position: relative; }
+        .input-wrap input { width: 100%; padding: 10px 40px 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: #e8e8f0; font-size: 14px; outline: none; }
+        .input-wrap input:focus { border-color: #f093fb; }
+        .eye-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #7c7c99; cursor: pointer; font-size: 15px; }
+        .save-btn { width: 100%; padding: 12px; border-radius: 10px; border: none; background: linear-gradient(135deg, #f093fb, #f5576c); color: white; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 6px; }
+        .back-btn { display: block; text-align: center; color: #7c7c99; font-size: 13px; text-decoration: none; margin-top: 14px; }
+        .success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #4ade80; margin-bottom: 16px; }
+        .error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #ef4444; margin-bottom: 16px; }
+        .divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 20px 0; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="avatar">👤</div>
+    <p class="username-display">{{ user.name }}</p>
+    <p class="email-display">{{ user.email }}</p>
+
+    <h1>⚙️ Profile</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <!-- Change Name -->
+    <p class="section-title">✏️ Change Name</p>
+    <form method="POST" action="/profile/name">
+        <div class="form-group">
+            <label>New Name</label>
+            <div class="input-wrap">
+                <input type="text" name="name" placeholder="{{ user.name }}" required>
+            </div>
+        </div>
+        <button type="submit" class="save-btn">Update Name</button>
+    </form>
+
+    <hr class="divider">
+
+    <!-- Change Password -->
+    <p class="section-title">🔒 Change Password</p>
+    <form method="POST" action="/profile/password">
+        <div class="form-group">
+            <label>Current Password</label>
+            <div class="input-wrap">
+                <input type="password" name="current_password" id="curPass" placeholder="••••••••" required>
+                <button type="button" class="eye-btn" onclick="togglePass('curPass', this)">👁️</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>New Password</label>
+            <div class="input-wrap">
+                <input type="password" name="new_password" id="newPass" placeholder="••••••••" required>
+                <button type="button" class="eye-btn" onclick="togglePass('newPass', this)">👁️</button>
+            </div>
+        </div>
+        <button type="submit" class="save-btn">Update Password</button>
+    </form>
+
+    <a href="/" class="back-btn">← Back to Today</a>
+</div>
+
+<script>
+function togglePass(id, btn) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+}
+</script>
+</body>
+</html>

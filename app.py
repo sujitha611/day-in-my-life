@@ -204,6 +204,39 @@ def weekly():
     return render_template('weekly.html', week_data=week_data, user=current_user,
                           total_done=total_done, total_tasks=total_tasks, week_percent=week_percent)
 
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html', user=current_user)
+
+@app.route('/profile/name', methods=['POST'])
+@login_required
+def update_name():
+    name = request.form['name']
+    conn = get_db()
+    conn.execute('UPDATE users SET name=? WHERE id=?', (name, current_user.id))
+    conn.commit()
+    conn.close()
+    flash('Name updated successfully!', 'success')
+    return redirect(url_for('profile'))
+
+@app.route('/profile/password', methods=['POST'])
+@login_required
+def update_password():
+    current_password = request.form['current_password']
+    new_password = request.form['new_password']
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id=?', (current_user.id,)).fetchone()
+    if check_password_hash(user['password'], current_password):
+        conn.execute('UPDATE users SET password=? WHERE id=?',
+                    (generate_password_hash(new_password), current_user.id))
+        conn.commit()
+        flash('Password updated successfully!', 'success')
+    else:
+        flash('Current password is wrong!', 'error')
+    conn.close()
+    return redirect(url_for('profile'))
+
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
