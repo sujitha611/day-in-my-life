@@ -59,7 +59,8 @@
         .close-banner { background: none; border: none; color: rgba(255,255,255,0.3); cursor: pointer; font-size: 18px; position: absolute; top: 10px; right: 14px; }
         .footer { text-align: center; color: rgba(255,255,255,0.15); font-size: 11px; margin-top: 24px; }
         .streak { color: #fda085; font-size: 13px; font-weight: 700; margin-top: 4px; }
-
+        .achievement-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .achievement-item { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 10px; }
         /* Light mode */
         body.light { background: linear-gradient(135deg, #f5f0ff, #e8f4ff, #fff0f5); color: #1a1a2e; }
         body.light .card { background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.08); }
@@ -78,6 +79,7 @@
         body.light .delete-btn { color: rgba(0,0,0,0.2); }
         body.light .task-notes { color: #6b6b8a; }
         body.light label { color: #6b6b8a; }
+        body.light .achievement-item { background: rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -207,6 +209,24 @@
             {% elif percent >= 50 %}💪 Good progress! Don't stop now!
             {% else %}😤 DML {{ user.name }}! Push harder!{% endif %}
         </p>
+    </div>
+    {% endif %}
+
+    <!-- Achievements -->
+    {% if achievements %}
+    <div class="card" style="margin-top:8px;">
+        <p class="section-title">🏆 Achievements</p>
+        <div class="achievement-grid">
+            {% for a in achievements %}
+            <div class="achievement-item">
+                <span style="font-size:24px;">{{ a.emoji }}</span>
+                <div>
+                    <p style="font-weight:700; font-size:13px; color:#f093fb;">{{ a.title }}</p>
+                    <p style="font-size:11px; color:#7c7c99; margin-top:2px;">{{ a.desc }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
 
@@ -344,7 +364,6 @@ function toggleTheme() {
     }
 }
 
-// Load saved theme
 if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light');
     document.getElementById('themeBtn').textContent = '🌙 Dark';

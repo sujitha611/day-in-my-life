@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, Response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+import csv
+import io
 from datetime import date, timedelta
 
 app = Flask(__name__)
@@ -89,6 +91,52 @@ def get_streak(user_id):
     conn.close()
     return streak
 
+def get_achievements(user_id):
+    conn = get_db()
+    achievements = []
+
+    total_done = conn.execute(
+        'SELECT COUNT(*) FROM tasks WHERE user_id=? AND done=1',
+        (user_id,)
+    ).fetchone()[0]
+
+    perfect_days = conn.execute(
+        '''SELECT COUNT(*) FROM (
+            SELECT task_date, COUNT(*) as total, SUM(done) as done
+            FROM tasks WHERE user_id=?
+            GROUP BY task_date
+            HAVING total > 0 AND done = total
+        )''',
+        (user_id,)
+    ).fetchone()[0]
+
+    days_used = conn.execute(
+        'SELECT COUNT(DISTINCT task_date) FROM tasks WHERE user_id=?',
+        (user_id,)
+    ).fetchone()[0]
+
+    streak = get_streak(user_id)
+    conn.close()
+
+    if total_done >= 1:
+        achievements.append({'emoji': '🥇', 'title': 'First Step!', 'desc': 'Completed your first task!'})
+    if total_done >= 10:
+        achievements.append({'emoji': '⚡', 'title': 'Task Master!', 'desc': 'Completed 10 tasks!'})
+    if total_done >= 50:
+        achievements.append({'emoji': '🚀', 'title': 'Productivity Pro!', 'desc': 'Completed 50 tasks!'})
+    if perfect_days >= 1:
+        achievements.append({'emoji': '💯', 'title': 'Perfect Day!', 'desc': 'Completed all tasks in a day!'})
+    if perfect_days >= 7:
+        achievements.append({'emoji': '👑', 'title': 'Week Champion!', 'desc': '7 perfect days!'})
+    if streak >= 3:
+        achievements.append({'emoji': '🔥', 'title': 'On Fire!', 'desc': '3 day streak!'})
+    if streak >= 7:
+        achievements.append({'emoji': '⭐', 'title': 'Unstoppable!', 'desc': '7 day streak!'})
+    if days_used >= 7:
+        achievements.append({'emoji': '📅', 'title': 'Consistent!', 'desc': 'Used app for 7 days!'})
+
+    return achievements
+
 @app.route('/')
 @login_required
 def index():
@@ -98,6 +146,7 @@ def index():
     days_off = get_days_off(current_user.id)
     is_off = today_date.weekday() in days_off
     streak = get_streak(current_user.id)
+    achievements = get_achievements(current_user.id)
     tasks = []
     if not is_off:
         existing = conn.execute('SELECT COUNT(*) FROM tasks WHERE user_id=? AND task_date=?',
@@ -121,7 +170,7 @@ def index():
         tasks = conn.execute('SELECT * FROM tasks WHERE user_id=? AND task_date=?',
                             (current_user.id, today)).fetchall()
     conn.close()
-    return render_template('index.html', tasks=tasks, today=today, user=current_user, is_off=is_off, streak=streak)
+    return render_template('index.html', tasks=tasks, today=today, user=current_user, is_off=is_off, streak=streak, achievements=achievements)
 
 @app.route('/add', methods=['POST'])
 @login_required
@@ -159,6 +208,7 @@ def delete(task_id):
     conn.commit()
     conn.close()
     return redirect('/')
+
 @app.route('/history')
 @login_required
 def history():
@@ -167,7 +217,7 @@ def history():
     search = request.args.get('search', '')
     if search:
         days = conn.execute(
-            '''SELECT task_date, COUNT(*) as total, SUM(done) as done 
+            '''SELECT task_date, COUNT(*) as total, SUM(done) as done
                FROM tasks WHERE user_id=? AND task_date != ? AND name LIKE ?
                GROUP BY task_date ORDER BY task_date DESC''',
             (current_user.id, today, f'%{search}%')
@@ -269,6 +319,35 @@ def settings():
     days_off = get_days_off(current_user.id)
     return render_template('settings.html', user=current_user, days_off=days_off)
 
+@app.route('/export')
+@login_required
+def export():
+    conn = get_db()
+    tasks = conn.execute(
+        'SELECT name, start_time, end_time, is_routine, done, task_date, notes FROM tasks WHERE user_id=? ORDER BY task_date DESC',
+        (current_user.id,)
+    ).fetchall()
+    conn.close()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Task', 'Start Time', 'End Time', 'Routine', 'Done', 'Date', 'Notes'])
+    for task in tasks:
+        writer.writerow([
+            task['name'],
+            task['start_time'],
+            task['end_time'],
+            'Yes' if task['is_routine'] else 'No',
+            'Done' if task['done'] else 'Pending',
+            task['task_date'],
+            task['notes']
+        ])
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment;filename=diml_tasks_{current_user.name}.csv'}
+    )
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -301,38 +380,7 @@ def login():
             return redirect(url_for('index'))
         flash('Wrong email or password!', 'error')
     return render_template('login.html')
-@app.route('/export')
-@login_required
-def export():
-    import csv
-    import io
-    from flask import Response
-    conn = get_db()
-    tasks = conn.execute(
-        'SELECT name, start_time, end_time, is_routine, done, task_date, notes FROM tasks WHERE user_id=? ORDER BY task_date DESC',
-        (current_user.id,)
-    ).fetchall()
-    conn.close()
 
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['Task', 'Start Time', 'End Time', 'Routine', 'Done', 'Date', 'Notes'])
-    for task in tasks:
-        writer.writerow([
-            task['name'],
-            task['start_time'],
-            task['end_time'],
-            'Yes' if task['is_routine'] else 'No',
-            'Done' if task['done'] else 'Pending',
-            task['task_date'],
-            task['notes']
-        ])
-    output.seek(0)
-    return Response(
-        output.getvalue(),
-        mimetype='text/csv',
-        headers={'Content-Disposition': f'attachment;filename=diml_tasks_{current_user.name}.csv'}
-    )
 @app.route('/logout')
 @login_required
 def logout():
